@@ -1,142 +1,24 @@
-[![Build Status](https://travis-ci.org/boroivanov/yoki.svg)](https://travis-ci.org/boroivanov/yoki)
-[![Maintainability](https://api.codeclimate.com/v1/badges/ae723a0073e47a34bd9d/maintainability)](https://codeclimate.com/github/boroivanov/yoki/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/ae723a0073e47a34bd9d/test_coverage)](https://codeclimate.com/github/boroivanov/yoki/test_coverage)
+# yoki
 
-# Yōki 容器 (ECS API)
+本仓库是「yoki」的安卓版本获取入口，附使用资料索引。
 
-Yoki is a supplementary ECS API. The main goal is to provide information and functionality which is either not easily accessible or not available via the AWS API and console.
+## 安装文件资源（夸克网盘）
 
-Yoki also comes bundled with a slack app. The app provides commands for deploying and scaling with auto-updating post messages.
+> **yoki 安装文件资源（夸克网盘）**：[https://pan.quark.cn/s/9367ec00452a](https://pan.quark.cn/s/9367ec00452a)
 
-Main features:
-- easy deployments and scaling.
-- service groups - deploy and scale a group of services at once.
-- deployment release history.
-- rollback a release.
-- slack commands and notifications.
-- auth via cognito user pools
+## 官方项目
 
+- 上游项目：[boroivanov/yoki](https://github.com/boroivanov/yoki)
 
-# Installation
+## 更多资料
 
-### API Installation
-Yoki is a serverless app. The installation will create API GW, DynamoDB tables, Lambda functions, Cognito User Pool and IAM role with permission to those resources.
+- [下载与安装教程](https://github.com/alipymanbu/Android/blob/master/%E5%AE%98%E7%BD%91%E7%89%88APP%E4%B8%8B%E8%BD%BD/yoki/%E4%B8%8B%E8%BD%BD%E4%B8%8E%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B.md)
+- [常见问题与解决办法](https://github.com/alipymanbu/Android/blob/master/%E5%AE%98%E7%BD%91%E7%89%88APP%E4%B8%8B%E8%BD%BD/yoki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95.md)
+- [怎么玩与核心玩法](https://github.com/alipymanbu/Android/blob/master/%E5%AE%98%E7%BD%91%E7%89%88APP%E4%B8%8B%E8%BD%BD/yoki/%E6%80%8E%E4%B9%88%E7%8E%A9%E4%B8%8E%E6%A0%B8%E5%BF%83%E7%8E%A9%E6%B3%95.md)
+- [注册登录与资料设置](https://github.com/alipymanbu/Android/blob/master/%E5%AE%98%E7%BD%91%E7%89%88APP%E4%B8%8B%E8%BD%BD/yoki/%E6%B3%A8%E5%86%8C%E7%99%BB%E5%BD%95%E4%B8%8E%E8%B5%84%E6%96%99%E8%AE%BE%E7%BD%AE.md)
+- [网盘转存与下载失败处理](https://github.com/alipymanbu/Android/blob/master/%E5%AE%98%E7%BD%91%E7%89%88APP%E4%B8%8B%E8%BD%BD/yoki/%E7%BD%91%E7%9B%98%E8%BD%AC%E5%AD%98%E4%B8%8E%E4%B8%8B%E8%BD%BD%E5%A4%B1%E8%B4%A5%E5%A4%84%E7%90%86.md)
+- [全部软件目录](https://github.com/alipymanbu/Android/blob/master/%E5%85%A8%E9%83%A8%E8%BD%AF%E4%BB%B6%E7%9B%AE%E5%BD%95.md)
 
-**Deploy the API**
+---
 
-```bash
-# For your initial installation you should run all the commands below in the parent app dir.
-
-# Create the environment variables files. The defaults are safe to use but change SLACK_CHANNEL or create that channel in your slack org.
-cp .env.yml.example .env.yml
-
-# Install Serverless
-npm install -g serverless
-npm install serverless-python-requirements
-npm install serverless-wsgi
-
-# Python virtual env
-virtualenv -p `which python3` venv
-source venv/bin/activate
-
-# Deploy the app
-sls deploy --stage prod
-```
-
-
-### Slack App Installation
-
-You will need to manually create the slack app in your org. PLease follow the steps below.
-
-1. Go to https://api.slack.com/apps and `Create New App`
-2. Record the `Verification Token` from the Basic Information page.
-3. Go to Slack Commands and create a new command called `/ecs`
-    - Use the API GW endpoint from the serverless output as `Request URL` for the slack command
-    - Ex: `Request URL` https://asdf1234.execute-api.us-east-1.amazonaws.com/prod/slack
-
-    ![slackapp_slash_command](images/slackapp-slash-command.png?raw=true)
-
-4. Go to OAuth & Permissions and grant the following permissions to the slack app:
-    - channels:read
-    - chat:write:bot
-    - chat:write:user
-    - incoming-webhook
-    - commands
-    - groups:read
-
-5. Install the app and record the `OAuth Access Token` from the OAuth & Permissions near the top.
-6. Update the .env.yml file and add `Verification Token` and `OAuth Access Token`
-    ```bash
-    $ cat .env.yml
-    lambda:
-    environment:
-        ....
-        SLACK_VERIFICATION_TOKEN: asdf1234asdf1234 # Verification Token (step 3)
-        SLACK_TOKEN: xoxp-11111111111-1111111111111-1111111111111-abcd3abcd3abcd3abcd3abcd3abcd3123 # OAuth Access Token (step 4)
-    ```
-7. Update your api
-    ```bash
-    sls deploy --stage prod
-    ```
-
-# Examples
-
-### Slack command examples
-
-```yaml
-/ecs help
-
-/ecs deploy <cluster> <service> <docker_tag>
-
-# Manage service groups
-/ecs groups
-/ecs groups mygroup srv1 srv2
-/ecs groups mygroup -d
-
-# Deploy to a group of services
-/ecs group-deploy <cluster> <group> <tags>
-
-# scale
-/ecs scale <cluster> <service> <count>
-/ecs group-scale <cluster> <groups> <count>
-
-# List deployment history and/or rollback
-/ecs rollback <cluster> <service>
-```
-
-![slackapp_message](images/slackapp-message.png?raw=true)
-
-
-### API examples
-
-```bash
-# Auth
-curl -XPOST -H 'Content-type: application/json' -d '{"username": "username@example.com", "password": "pass123"}' localhost:5000/auth
-
-
-# Create service group
-curl -XPOST -H 'Content-type: application/json' -H "$AUTH" -d '{"services": "srv1 srv2"}' localhost:5000/groups/group1
-# List service groups
-curl -H "$AUTH" localhost:5000/groups
-curl -H "$AUTH" localhost:5000/groups/group1
-
-
-# List Deployments
-curl -H "$AUTH" localhost:5000/deployments
-curl -H "$AUTH" localhost:5000/deployments/${deployment_id}
-curl -H "$AUTH" localhost:5000/clusters/${cluster}/deployments
-curl -H "$AUTH" localhost:5000/clusters/${cluster}/services/${service}/deployments
-
-
-# Create deployment - single service
-curl -H 'Content-type: application/json' -H "$AUTH" -d '{"tags": {"container_name": "docker_tag"}}' localhost:5000/clusters/${cluster}/services/${service}/deploy
-# Create deployment - service group
-curl -H 'Content-type: application/json' -H "$AUTH" -d '{"tags": {"container_name": "docker_tag"}}' localhost:5000/clusters/${cluster}/groups/${group}/deploy
-
-
-# Scale - single service
-curl -H 'Content-type: application/json' -H "$AUTH" -d '{"count": 1}' localhost:5000/clusters/${cluster}/services/${service}/scale
-# Scale - service group
-curl -H 'Content-type: application/json' -H "$AUTH" -d '{"count": 1}' localhost:5000/clusters/${cluster}/groups/${group}/scale
-
-```
+> 本仓库由上游项目 fork 而来，原始说明见[上游仓库](https://github.com/boroivanov/yoki)。
